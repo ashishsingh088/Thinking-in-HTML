@@ -1,0 +1,120 @@
+GENAI INTERNSHIP — WEEK 1 PROJECT 2
+Thinking in HTML
+Prompts used with Claude
+
+========================
+PAGE 1 — AI/ML REVISION DASHBOARD
+========================
+
+Who:
+You are a senior frontend developer and UX designer helping a BTech CSE (AI) student create an interactive revision dashboard.
+
+What:
+Create a complete single-file HTML page called “AI/ML Revision Dashboard”.
+
+Do:
+Build a realistic, polished AI/ML exam revision dashboard with:
+- Topic checklist containing at least 10 important AI/ML topics.
+- Live revision progress percentage.
+- Exam countdown.
+- Search/filter for topics.
+- At least 10 interactive flashcards.
+- A 6-question interactive quiz with score.
+- Reset functionality.
+- Clear visual feedback when items are completed/clicked.
+- Responsive layout that works on laptop and mobile.
+- Modern AI/technology themed design.
+
+Rules:
+- Return ONE complete HTML file only.
+- Put all HTML, CSS and JavaScript in the same file.
+- No external libraries, APIs or external files.
+- Every button, checkbox, search/filter and quiz interaction must work.
+- No console errors.
+- Make it visually polished and realistic, not a basic demo.
+- Use accessible labels and mobile-friendly controls.
+- Include a footer saying: “Built with AI assistance for GenAI Internship — Project 2”.
+
+========================
+PAGE 2 — AI/ML ALGORITHM DECISION HELPER
+========================
+
+Who:
+You are a senior frontend developer and UX designer helping a BTech CSE (AI) student build an interactive AI/ML learning tool.
+
+What:
+Create a complete single-file HTML page called “AI/ML Algorithm Decision Helper”.
+
+Do:
+Build a realistic interactive decision helper that recommends suitable machine-learning algorithms based on project requirements.
+
+Include:
+- Dataset size slider.
+- Accuracy importance slider.
+- Speed importance slider.
+- Interpretability importance slider.
+- Classification / Regression / Both filter.
+- Algorithm comparison cards.
+- Live algorithm ranking/recommendation.
+- A clear explanation of why the top algorithm was selected.
+- Quick scenario buttons such as:
+  1. Fast & Simple
+  2. Maximum Accuracy
+  3. Easy to Explain
+  4. Small Dataset
+- Reset functionality.
+- Responsive laptop/mobile design.
+- Modern AI/technology themed UI.
+
+Rules:
+- Return ONE complete HTML file only.
+- All HTML, CSS and JavaScript must be inside the same file.
+- No external libraries, APIs or external files.
+- All sliders, filters, cards, scenario buttons and reset must work.
+- Ranking and recommendation must update live.
+- No console errors.
+- Make the interface polished and realistic.
+- Include accessible labels and mobile-friendly controls.
+- Include a footer saying: “Built with AI assistance for GenAI Internship — Project 2”.
+
+========================
+PAGE 3 — INTERACTIVE NEURAL NETWORK PLAYGROUND
+========================
+
+Who:
+You are a senior frontend developer and AI educator helping a BTech CSE (AI) student create an interactive educational neural-network playground.
+
+What:
+Create a complete single-file HTML page called “Interactive Neural Network Playground”.
+
+Do:
+Build a realistic interactive neural-network visualization and learning playground.
+
+Required interactions/features:
+- Hidden layer count selector: 1–3.
+- Neurons per hidden layer slider: 2–8.
+- Activation function selector: ReLU, Sigmoid, Tanh.
+- Learning rate slider from 0.001 to 1.
+- Input X1 slider.
+- Input X2 slider.
+- Visual neural network showing input, hidden and output layers.
+- Connections between neurons with visual indication of weights.
+- Live educational prediction/output.
+- Activation-function graph that changes with the selected activation.
+- Learning-rate/training-loss simulation.
+- Reset button.
+- Random/new weights interaction.
+- “How it works” educational explanation.
+- Responsive laptop and mobile layout.
+- Modern AI/technology themed design.
+
+Rules:
+- Return ONE complete HTML file only.
+- All HTML, CSS and JavaScript must be in the same file.
+- No external libraries, APIs or external files.
+- Every interaction must work.
+- No console errors.
+- The simulation should clearly state that it is educational and not a real trained model.
+- Make the visualization polished and easy to understand.
+- Include accessible labels and mobile-friendly controls.
+- Include a footer saying: “Built with AI assistance for GenAI Internship — Project 2”.

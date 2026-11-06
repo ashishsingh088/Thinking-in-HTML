@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI/ML Algorithm Decision Helper</title>
+<style>
+:root{
+  --bg:#f4f3fc;--card:#fff;--ink:#1c1b3a;--muted:#686a8c;--line:#e2e1f3;
+  --p:#6d4aff;--p2:#3b82f6;--soft:#efecff;--ok:#16a34a;
+  --shadow:0 6px 24px rgba(60,40,140,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+header{background:linear-gradient(135deg,#1e1458 0%,#5b3df0 55%,#3b82f6 100%);color:#fff;text-align:center;padding:38px 18px 80px}
+header h1{font-size:clamp(1.6rem,5vw,2.5rem)}
+header p{opacity:.9;margin-top:6px;font-size:clamp(.95rem,2.5vw,1.1rem)}
+main{max-width:1150px;margin:-52px auto 24px;padding:0 16px;display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+h2{font-size:1.1rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+h2:before{content:"";width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p2))}
+.ctl{margin-bottom:18px}
+.ctl .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;font-weight:600;font-size:.92rem}
+.ctl output{color:var(--p);font-weight:700}
+.hint{font-size:.78rem;color:var(--muted);margin-top:4px}
+input[type=range]{width:100%;accent-color:var(--p);height:28px;cursor:pointer}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{text-align:center;padding:9px 4px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:.88rem;font-weight:600;transition:.2s}
+.seg input:checked+label{background:var(--p);color:#fff;border-color:var(--p)}
+.seg input:focus-visible+label{outline:2px solid var(--p2);outline-offset:2px}
+button{font:inherit;font-weight:600;border:none;border-radius:10px;padding:10px 14px;cursor:pointer;transition:transform .15s,background .2s,box-shadow .15s}
+button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+button:focus-visible{outline:2px solid var(--p2);outline-offset:2px}
+.sc{background:var(--soft);color:var(--p)}
+.sc.active{background:var(--p);color:#fff}
+.scgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.reset{width:100%;background:#fee2e2;color:#dc2626}
+.info{margin-top:16px;font-size:.82rem;color:var(--muted);background:#f7f6ff;border-left:4px solid var(--p);padding:10px 12px;border-radius:8px}
+.best{background:linear-gradient(135deg,#2a1a7a,#5b3df0 60%,#3b82f6);color:#fff;border:none;margin-bottom:18px}
+.best h2{color:#fff}.best h2:before{background:#fff}
+.best .rec{font-size:clamp(1.3rem,4vw,1.8rem);font-weight:800;margin-bottom:8px}
+.best p{opacity:.95;font-size:.95rem}
+.best .sub{margin-top:10px;font-size:.85rem;opacity:.8}
+#list{display:grid;gap:14px}
+.alg{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff;animation:fade .35s ease both}
+.alg.first{border:2px solid var(--p);box-shadow:0 8px 26px rgba(109,74,255,.2);background:linear-gradient(180deg,#faf8ff,#fff)}
+@keyframes fade{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}
+.head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rank{width:36px;height:36px;border-radius:50%;background:var(--soft);color:var(--p);display:grid;place-items:center;font-weight:800;flex-shrink:0}
+.first .rank{background:var(--p);color:#fff}
+.nm{font-weight:700;font-size:1.05rem;flex:1;min-width:120px}
+.pill{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--soft);color:var(--p)}
+.crown{background:#fef3c7;color:#b45309}
+.desc{font-size:.88rem;color:var(--muted);margin:10px 0}
+.match{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:.85rem;font-weight:600}
+.bar{height:10px;background:#ebeaf7;border-radius:99px;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--p),var(--p2));transition:width .35s ease}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.m span{display:flex;justify-content:space-between;font-size:.76rem;color:var(--muted);margin-bottom:3px}
+.m .bar{height:7px}
+.m .bar i{background:linear-gradient(90deg,#a78bfa,#60a5fa)}
+.meta{font-size:.8rem;margin-top:10px;color:var(--muted)}
+.meta b{color:var(--ink)}
+.hidden-note{font-size:.82rem;color:var(--muted);margin-top:12px}
+footer{text-align:center;color:var(--muted);padding:20px 16px 34px;font-size:.9rem}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+@media(max-width:520px){.metrics{grid-template-columns:1fr}.card{padding:16px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>AI/ML Algorithm Decision Helper</h1>
+  <p>Choose the right model based on your project needs</p>
+</header>
+
+<main>
+  <aside class="card" aria-label="Project requirements">
+    <h2>Your Requirements</h2>
+
+    <div class="ctl">
+      <div class="top"><label for="size">Dataset Size</label><output for="size" id="sizeOut"></output></div>
+      <input type="range" id="size" min="0" max="100" value="50">
+      <div class="hint">Small (100 rows) → Large (1,000,000 rows)</div>
+    </div>
+    <div class="ctl">
+      <div class="top"><label for="acc">Accuracy Importance</label><output for="acc" id="accOut"></output></div>
+      <input type="range" id="acc" min="0" max="100" value="60">
+    </div>
+    <div class="ctl">
+      <div class="top"><label for="spd">Speed Importance</label><output for="spd" id="spdOut"></output></div>
+      <input type="range" id="spd" min="0" max="100" value="50">
+    </div>
+    <div class="ctl">
+      <div class="top"><label for="int">Interpretability Importance</label><output for="int" id="intOut"></output></div>
+      <input type="range" id="int" min="0" max="100" value="50">
+    </div>
+
+    <div class="ctl">
+      <div class="top" id="ptLabel">Problem Type</div>
+      <div class="seg" role="radiogroup" aria-labelledby="ptLabel">
+        <input type="radio" name="pt" id="ptC" value="classification"><label for="ptC">Classification</label>
+        <input type="radio" name="pt" id="ptR" value="regression"><label for="ptR">Regression</label>
+        <input type="radio" name="pt" id="ptB" value="both" checked><label for="ptB">Both</label>
+      </div>
+    </div>
+
+    <h2 style="margin-top:6px">Quick Scenarios</h2>
+    <div class="scgrid" id="scenarios"></div>
+    <button class="reset" id="reset" type="button">Reset to Defaults</button>
+
+    <p class="info"><b>Note:</b> This tool uses sample scoring data for demonstration. It is not a substitute for testing models on your actual dataset.</p>
+  </aside>
+
+  <section aria-live="polite">
+    <div class="card best" id="best"></div>
+    <div class="card">
+      <h2>Recommended Algorithms</h2>
+      <div id="list"></div>
+      <p class="hidden-note" id="hiddenNote"></p>
+    </div>
+  </section>
+</main>
+
+<footer>Built with AI assistance for GenAI Internship — Project 2</footer>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){return document.getElementById(id);};
+
+  /* Sample scoring data (0-100). fit = [lo, hi] preferred dataset-size range (0 = small, 1 = large) */
+  var ALGS = [
+    {name:"Linear Regression",   types:["regression"],                   acc:55, spd:95, int:95, fit:[0,1],     req:"Works with small to large data; assumes a linear relationship.", desc:"Fits a straight line (or plane) to predict a continuous value. Very fast and easy to explain."},
+    {name:"Logistic Regression", types:["classification"],               acc:65, spd:90, int:85, fit:[0,1],     req:"Works with small to large data; best with roughly linear class boundaries.", desc:"Predicts class probabilities with a sigmoid curve. A strong, simple classification baseline."},
+    {name:"KNN",                 types:["classification","regression"],  acc:68, spd:40, int:60, fit:[0,0.45],  req:"Small to medium data; prediction slows down as data grows. Needs feature scaling.", desc:"Predicts using the K closest training examples. No training step, but slow at prediction time."},
+    {name:"SVM",                 types:["classification","regression"],  acc:80, spd:45, int:35, fit:[0.1,0.55],req:"Small to medium data; training time grows quickly with rows.", desc:"Finds the maximum-margin boundary and uses kernels for non-linear patterns."},
+    {name:"Decision Tree",       types:["classification","regression"],  acc:65, spd:85, int:90, fit:[0,0.8],   req:"Small to large data; handles mixed features without scaling.", desc:"Splits data with simple if-else rules. Easy to visualise but can overfit."},
+    {name:"Random Forest",       types:["classification","regression"],  acc:85, spd:65, int:45, fit:[0.25,0.9],req:"Medium to large data; robust to noise and outliers.", desc:"Averages many decision trees to reduce overfitting and improve accuracy."},
+    {name:"Neural Network",      types:["classification","regression"],  acc:92, spd:30, int:15, fit:[0.6,1],   req:"Large data and more compute; needs careful tuning.", desc:"Layers of connected neurons learn complex patterns. Highest ceiling but a black box."}
+  ];
+  var DEFAULTS = {size:50, acc:60, spd:50, int:50, pt:"both"};
+  var SCENARIOS = [
+    {label:"Fast & Simple",    v:{size:40, acc:30, spd:90, int:60, pt:"both"}},
+    {label:"Maximum Accuracy", v:{size:80, acc:100,spd:10, int:5,  pt:"both"}},
+    {label:"Easy to Explain",  v:{size:40, acc:40, spd:50, int:95, pt:"both"}},
+    {label:"Small Dataset",    v:{size:8,  acc:60, spd:50, int:50, pt:"both"}}
+  ];
+  var FIT_WEIGHT = 60; /* dataset suitability always counts */
+  var activeScenario = -1;
+
+  function rows(v){return Math.round(Math.pow(10, 2 + v/100*4));}
+  function sizeLabel(v){return v<33 ? "Small" : v<67 ? "Medium" : "Large";}
+  function fitScore(a, s){
+    var d = s < a.fit[0] ? a.fit[0]-s : s > a.fit[1] ? s-a.fit[1] : 0;
+    return Math.max(0, Math.round(100 - d*160));
+  }
+  function cap(t){return t.charAt(0).toUpperCase()+t.slice(1);}
+
+  function state(){
+    return {
+      size:+$("size").value, acc:+$("acc").value, spd:+$("spd").value, int:+$("int").value,
+      pt:document.querySelector('input[name="pt"]:checked').value
+    };
+  }
+  function apply(v){
+    $("size").value=v.size; $("acc").value=v.acc; $("spd").value=v.spd; $("int").value=v.int;
+    document.querySelector('input[name="pt"][value="'+v.pt+'"]').checked = true;
+  }
+
+  function compute(){
+    var s = state(), pos = s.size/100;
+    var tw = s.acc + s.spd + s.int + FIT_WEIGHT;
+    var pool = ALGS.filter(function(a){return s.pt==="both" || a.types.indexOf(s.pt)!==-1;});
+    var hidden = ALGS.filter(function(a){return pool.indexOf(a)===-1;});
+    var ranked = pool.map(function(a){
+      var f = fitScore(a,pos);
+      var total = (s.acc*a.acc + s.spd*a.spd + s.int*a.int + FIT_WEIGHT*f) / tw;
+      return {a:a, fit:f, score:Math.round(total)};
+    }).sort(function(x,y){return y.score-x.score;});
+    return {s:s, ranked:ranked, hidden:hidden};
+  }
+
+  function explain(r){
+    var s=r.s, top=r.ranked[0];
+    if(!top) return {title:"No algorithm available", body:"No algorithm matches this filter."};
+    var a=top.a;
+    var facts = [
+      {w:s.acc, v:a.acc, t:"accuracy ("+a.acc+"/100)", label:"accuracy"},
+      {w:s.spd, v:a.spd, t:"speed ("+a.spd+"/100)", label:"speed"},
+      {w:s.int, v:a.int, t:"interpretability ("+a.int+"/100)", label:"interpretability"},
+      {w:FIT_WEIGHT, v:top.fit, t:"suitability for a "+sizeLabel(s.size).toLowerCase()+" dataset ("+top.fit+"/100)", label:"data fit"}
+    ];
+    var strong = facts.filter(function(f){return f.w>=25 && f.v>=70;}).sort(function(x,y){return y.w-x.w;}).slice(0,3);
+    var weak = facts.filter(function(f){return f.w>=60 && f.v<50;});
+    var body;
+    if(strong.length){
+      body = "It ranks first with a match score of "+top.score+"/100 because it is strong in " +
+        strong.map(function(f){return f.t;}).join(", ") +
+        ", which are the areas your priorities weight most.";
+    } else {
+      body = "It ranks first with a match score of "+top.score+"/100 because it offers the best overall balance for your current priorities.";
+    }
+    if(weak.length) body += " Trade-off: it is weaker in "+weak.map(function(f){return f.label;}).join(" and ")+".";
+    var sub = "";
+    if(r.ranked.length>1){
+      var gap = top.score - r.ranked[1].score;
+      sub = "Runner-up: "+r.ranked[1].a.name+" ("+r.ranked[1].score+"/100)" + (gap<=2 ? " — a very close call, so test both." : ".");
+    }
+    return {title:"Recommended: "+a.name, body:body, sub:sub};
+  }
+
+  function bar(label, val){
+    return '<div class="m"><span><em style="font-style:normal">'+label+'</em><b>'+val+'</b></span><div class="bar"><i style="width:'+val+'%"></i></div></div>';
+  }
+
+  function render(){
+    var r = compute(), s = r.s;
+    $("sizeOut").textContent = sizeLabel(s.size)+" · "+rows(s.size).toLocaleString()+" rows";
+    $("accOut").textContent = s.acc+"%";
+    $("spdOut").textContent = s.spd+"%";
+    $("intOut").textContent = s.int+"%";
+
+    var ex = explain(r);
+    $("best").innerHTML = '<h2>Best Choice</h2><div class="rec">'+ex.title+'</div><p>'+ex.body+'</p>'+(ex.sub?'<p class="sub">'+ex.sub+'</p>':'');
+
+    $("list").innerHTML = r.ranked.map(function(x,i){
+      var a=x.a;
+      return '<article class="alg'+(i===0?' first':'')+'">' +
+        '<div class="head"><div class="rank">'+(i+1)+'</div><div class="nm">'+a.name+'</div>' +
+        (i===0?'<span class="pill crown">★ Top Pick</span>':'') +
+        a.types.map(function(t){return '<span class="pill">'+cap(t)+'</span>';}).join("") +
+        '</div><p class="desc">'+a.desc+'</p>' +
+        '<div class="match"><span>Match</span><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+x.score+'" aria-label="Match score for '+a.name+'"><i style="width:'+x.score+'%"></i></div><span>'+x.score+'/100</span></div>' +
+        '<div class="metrics">'+bar("Accuracy",a.acc)+bar("Speed",a.spd)+bar("Interpretability",a.int)+'</div>' +
+        '<p class="meta"><b>Data requirement:</b> '+a.req+'</p></article>';
+    }).join("");
+
+    $("hiddenNote").textContent = r.hidden.length
+      ? "Hidden for "+s.pt+" problems: "+r.hidden.map(function(a){return a.name;}).join(", ")+"."
+      : "";
+
+    Array.prototype.forEach.call($("scenarios").children, function(b,i){
+      b.classList.toggle("active", i===activeScenario);
+      b.setAttribute("aria-pressed", i===activeScenario ? "true":"false");
+    });
+  }
+
+  /* Build scenario buttons */
+  SCENARIOS.forEach(function(sc,i){
+    var b=document.createElement("button");
+    b.type="button"; b.className="sc"; b.textContent=sc.label;
+    b.addEventListener("click", function(){apply(sc.v); activeScenario=i; render();});
+    $("scenarios").appendChild(b);
+  });
+
+  /* Manual changes clear the active scenario */
+  function manual(){activeScenario=-1; render();}
+  ["size","acc","spd","int"].forEach(function(id){$(id).addEventListener("input", manual);});
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="pt"]'), function(el){
+    el.addEventListener("change", manual);
+  });
+
+  $("reset").addEventListener("click", function(){apply(DEFAULTS); activeScenario=-1; render();});
+
+  render();
+})();
+</script>
+</body>
+</html>

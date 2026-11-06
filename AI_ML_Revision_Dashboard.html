@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI/ML Revision Dashboard</title>
+<style>
+:root{
+  --bg:#f3f5fb; --card:#ffffff; --ink:#1b2240; --muted:#64708f; --line:#e3e7f3;
+  --brand:#5b5bf0; --brand2:#22b8cf; --ok:#16a34a; --bad:#dc2626; --warn:#d97706;
+  --shadow:0 6px 24px rgba(40,50,110,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+header{background:linear-gradient(135deg,#1b1f4b 0%,#3b3bd0 55%,#22b8cf 100%);color:#fff;padding:40px 20px 70px;text-align:center}
+header h1{font-size:clamp(1.7rem,5vw,2.6rem);letter-spacing:.3px}
+header p{opacity:.9;margin-top:6px;font-size:clamp(.95rem,2.5vw,1.1rem)}
+.badge{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);padding:4px 14px;border-radius:99px;font-size:.8rem;margin-bottom:12px}
+main{max-width:1150px;margin:-45px auto 30px;padding:0 16px;display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+.card{background:var(--card);border-radius:16px;padding:22px;box-shadow:var(--shadow);border:1px solid var(--line);animation:rise .5s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.c-12{grid-column:span 12}.c-8{grid-column:span 8}.c-7{grid-column:span 7}.c-6{grid-column:span 6}.c-5{grid-column:span 5}.c-4{grid-column:span 4}
+h2{font-size:1.15rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+h2 .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand2))}
+button{font:inherit;cursor:pointer;border:none;border-radius:10px;padding:10px 16px;font-weight:600;transition:transform .15s,box-shadow .15s,background .2s}
+button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+button:active{transform:translateY(0)}
+.btn{background:var(--brand);color:#fff}
+.btn:hover{background:#4747d8}
+.btn.alt{background:#eceefb;color:var(--brand)}
+.btn.danger{background:#fee2e2;color:var(--bad)}
+input[type=text],input[type=date]{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%}
+input:focus{outline:2px solid var(--brand);outline-offset:1px}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stat{background:#f6f7ff;border-radius:12px;padding:14px;text-align:center}
+.stat b{display:block;font-size:1.8rem;color:var(--brand)}
+.stat span{font-size:.8rem;color:var(--muted)}
+.bar{height:16px;background:#e8ebf7;border-radius:99px;overflow:hidden}
+.bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand2));border-radius:99px;transition:width .5s ease}
+.msg{margin-top:12px;color:var(--muted);font-size:.92rem}
+/* checklist */
+.tools{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.tools input{flex:1;min-width:180px}
+#topicList{list-style:none;display:grid;gap:10px;max-height:470px;overflow:auto;padding-right:4px}
+#topicList li{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;transition:background .2s,border-color .2s}
+#topicList li:hover{border-color:var(--brand)}
+#topicList li.done{background:#f0fdf4;border-color:#bbf7d0}
+#topicList li.done .tname{text-decoration:line-through;color:var(--muted)}
+#topicList input{width:20px;height:20px;accent-color:var(--brand);flex-shrink:0;cursor:pointer}
+#topicList label{flex:1;cursor:pointer}
+.tname{font-weight:600;display:block}
+.tdesc{font-size:.82rem;color:var(--muted)}
+.tag{font-size:.7rem;background:#eceefb;color:var(--brand);padding:3px 9px;border-radius:99px;white-space:nowrap}
+.empty{text-align:center;color:var(--muted);padding:20px;display:none}
+/* countdown */
+.cd{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.cd div{background:linear-gradient(160deg,#1b1f4b,#3b3bd0);color:#fff;border-radius:12px;text-align:center;padding:14px 4px}
+.cd b{display:block;font-size:clamp(1.3rem,4vw,1.9rem);font-variant-numeric:tabular-nums}
+.cd span{font-size:.72rem;opacity:.8;text-transform:uppercase;letter-spacing:.5px}
+.row{display:flex;gap:10px}
+.small{font-size:.85rem;color:var(--muted);margin-top:10px}
+/* flashcards */
+.scene{perspective:1000px;margin-bottom:14px}
+.fc{position:relative;height:210px;transform-style:preserve-3d;transition:transform .6s;cursor:pointer}
+.fc.flip{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:22px;font-size:1.05rem}
+.front{background:linear-gradient(135deg,#eef0ff,#e6fbff);border:1px solid var(--line)}
+.back{background:linear-gradient(135deg,#3b3bd0,#22b8cf);color:#fff;transform:rotateY(180deg)}
+.face small{position:absolute;top:12px;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;opacity:.7}
+.fcnav{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+#fcCount{font-weight:600;color:var(--muted)}
+/* quiz */
+.q{padding:14px;border:1px solid var(--line);border-radius:12px;margin-bottom:12px}
+.q p{font-weight:600;margin-bottom:8px}
+.opt{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:9px;cursor:pointer;border:1px solid transparent;margin-bottom:4px}
+.opt:hover{background:#f3f4ff}
+.opt input{accent-color:var(--brand)}
+.opt.right{background:#dcfce7;border-color:#86efac}
+.opt.wrong{background:#fee2e2;border-color:#fca5a5}
+.why{display:none;font-size:.85rem;color:var(--muted);margin-top:6px}
+.score{display:none;text-align:center;padding:16px;border-radius:12px;background:#f6f7ff;margin-top:6px}
+.score b{font-size:2rem;color:var(--brand)}
+.warn{color:var(--warn);font-weight:600;margin-top:8px;min-height:1.2em}
+footer{text-align:center;color:var(--muted);padding:26px 16px 36px;font-size:.9rem}
+@media(max-width:860px){.c-8,.c-7,.c-6,.c-5,.c-4{grid-column:span 12}}
+@media(max-width:480px){
+  .card{padding:16px}.stats{gap:8px}.stat b{font-size:1.4rem}
+  .row{flex-direction:column}.fc{height:240px}
+  .fcnav button{flex:1}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">B.Tech CSE (AI) • Exam Prep</div>
+  <h1>AI/ML Revision Dashboard</h1>
+  <p>Interactive Study Tool — GenAI Internship Project 2</p>
+</header>
+
+<main>
+  <!-- PROGRESS -->
+  <section class="card c-5" aria-labelledby="h-prog">
+    <h2 id="h-prog"><span class="dot"></span>Study Progress</h2>
+    <div class="stats">
+      <div class="stat"><b id="sTotal">0</b><span>Total Topics</span></div>
+      <div class="stat"><b id="sDone">0</b><span>Completed</span></div>
+      <div class="stat"><b id="sPct">0%</b><span>Progress</span></div>
+    </div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="barWrap"><div id="barFill"></div></div>
+    <p class="msg" id="progMsg"></p>
+    <button class="btn danger" id="resetBtn" style="margin-top:16px">Reset Progress</button>
+  </section>
+
+  <!-- COUNTDOWN -->
+  <section class="card c-7" aria-labelledby="h-cd">
+    <h2 id="h-cd"><span class="dot"></span>Exam Countdown</h2>
+    <div class="cd">
+      <div><b id="cdD">00</b><span>Days</span></div>
+      <div><b id="cdH">00</b><span>Hours</span></div>
+      <div><b id="cdM">00</b><span>Minutes</span></div>
+      <div><b id="cdS">00</b><span>Seconds</span></div>
+    </div>
+    <div class="row">
+      <input type="date" id="examDate" aria-label="Exam date">
+      <button class="btn" id="setDate">Set Exam Date</button>
+    </div>
+    <p class="small" id="cdInfo"></p>
+  </section>
+
+  <!-- CHECKLIST -->
+  <section class="card c-6" aria-labelledby="h-list">
+    <h2 id="h-list"><span class="dot"></span>Topic Checklist</h2>
+    <div class="tools">
+      <input type="text" id="search" placeholder="Search topics (e.g. tree, SVM, regression)..." aria-label="Search topics">
+      <button class="btn alt" id="clearSearch">Clear</button>
+    </div>
+    <ul id="topicList"></ul>
+    <p class="empty" id="empty">No topics match your search.</p>
+  </section>
+
+  <!-- FLASHCARDS -->
+  <section class="card c-6" aria-labelledby="h-fc">
+    <h2 id="h-fc"><span class="dot"></span>Flashcards</h2>
+    <div class="scene">
+      <div class="fc" id="fc" tabindex="0" role="button" aria-label="Flashcard, click to flip">
+        <div class="face front"><small>Question</small><span id="fcQ"></span></div>
+        <div class="face back"><small>Answer</small><span id="fcA"></span></div>
+      </div>
+    </div>
+    <div class="fcnav">
+      <button class="btn alt" id="prev">← Previous</button>
+      <span id="fcCount"></span>
+      <button class="btn alt" id="shuffle">Shuffle</button>
+      <button class="btn" id="next">Next →</button>
+    </div>
+    <p class="small">Tip: click the card (or press Enter) to flip it.</p>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="card c-12" aria-labelledby="h-quiz">
+    <h2 id="h-quiz"><span class="dot"></span>Quick Quiz</h2>
+    <div id="quiz"></div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn" id="submitQuiz">Submit Quiz</button>
+      <button class="btn alt" id="resetQuiz">Reset Quiz</button>
+    </div>
+    <p class="warn" id="quizWarn"></p>
+    <div class="score" id="score"></div>
+  </section>
+</main>
+
+<footer>Built with AI assistance for GenAI Internship — Project 2</footer>
+
+<script>
+(function(){
+  "use strict";
+  /* ---------- Data ---------- */
+  var topics = [
+    {id:"mlb", name:"Machine Learning Basics", tag:"Foundations", desc:"Supervised vs unsupervised learning, bias-variance, overfitting."},
+    {id:"lin", name:"Linear Regression", tag:"Regression", desc:"Least squares, gradient descent, R-squared, assumptions."},
+    {id:"log", name:"Logistic Regression", tag:"Classification", desc:"Sigmoid, log-loss, decision boundary, odds ratio."},
+    {id:"knn", name:"KNN", tag:"Classification", desc:"Distance metrics, choosing K, curse of dimensionality."},
+    {id:"svm", name:"SVM", tag:"Classification", desc:"Maximum margin, support vectors, kernel trick, soft margin."},
+    {id:"pca", name:"PCA", tag:"Dimensionality Reduction", desc:"Covariance, eigenvectors, explained variance."},
+    {id:"dt",  name:"Decision Trees", tag:"Trees", desc:"Entropy, information gain, Gini index, pruning."},
+    {id:"rf",  name:"Random Forest", tag:"Ensemble", desc:"Bagging, feature randomness, out-of-bag error."},
+    {id:"nn",  name:"Neural Networks", tag:"Deep Learning", desc:"Perceptron, activation functions, backpropagation."},
+    {id:"eval",name:"Model Evaluation Metrics", tag:"Foundations", desc:"Precision, recall, F1, ROC-AUC, cross-validation."}
+  ];
+  var cards = [
+    {q:"What is overfitting?", a:"When a model learns noise in the training data and performs poorly on unseen data."},
+    {q:"What does the sigmoid function output?", a:"A value between 0 and 1, used to represent probability in logistic regression."},
+    {q:"What is the kernel trick in SVM?", a:"Computing similarity in a higher-dimensional space without explicitly transforming the data."},
+    {q:"What does PCA maximize?", a:"The variance captured by each successive principal component."},
+    {q:"Define Gini impurity.", a:"A measure of how often a randomly chosen sample would be misclassified: 1 − Σ pᵢ²."},
+    {q:"Why does Random Forest reduce variance?", a:"It averages many decorrelated trees trained on bootstrap samples (bagging)."},
+    {q:"What is backpropagation?", a:"An algorithm that uses the chain rule to compute gradients of the loss for each weight."},
+    {q:"What is the bias-variance tradeoff?", a:"Simple models have high bias; complex models have high variance. We aim to balance both."},
+    {q:"What is F1-score?", a:"The harmonic mean of precision and recall: 2PR / (P + R)."},
+    {q:"Why scale features before KNN?", a:"KNN uses distances, so large-range features would otherwise dominate the result."}
+  ];
+  var quiz = [
+    {q:"Which algorithm is an example of unsupervised learning?", o:["Linear Regression","K-Means Clustering","Logistic Regression","Decision Tree"], a:1, w:"K-Means groups unlabeled data into clusters."},
+    {q:"Which loss function is typically used in logistic regression?", o:["Mean Squared Error","Hinge loss","Log loss (cross-entropy)","Absolute error"], a:2, w:"Log loss penalizes confident wrong probability predictions."},
+    {q:"In SVM, the data points closest to the hyperplane are called:", o:["Centroids","Support vectors","Outliers","Principal components"], a:1, w:"Support vectors define the margin and the hyperplane."},
+    {q:"Random Forest is an example of which ensemble technique?", o:["Boosting","Stacking","Bagging","Pruning"], a:2, w:"It trains trees on bootstrap samples and aggregates them (bagging)."},
+    {q:"Which activation function outputs max(0, x)?", o:["Sigmoid","Tanh","ReLU","Softmax"], a:2, w:"ReLU = Rectified Linear Unit."},
+    {q:"PCA is mainly used for:", o:["Dimensionality reduction","Classification","Reinforcement learning","Text generation"], a:0, w:"PCA projects data onto fewer dimensions while keeping most variance."}
+  ];
+
+  /* ---------- Helpers ---------- */
+  var $ = function(id){return document.getElementById(id);};
+  function store(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+  function pad(n){return String(n).padStart(2,"0");}
+
+  /* ---------- Checklist + progress ---------- */
+  var done = load("aiml_done", {});
+  var list = $("topicList");
+
+  function renderTopics(){
+    list.innerHTML = "";
+    topics.forEach(function(t){
+      var li = document.createElement("li");
+      li.dataset.search = (t.name+" "+t.tag+" "+t.desc).toLowerCase();
+      if(done[t.id]) li.className = "done";
+      var cb = document.createElement("input");
+      cb.type = "checkbox"; cb.id = "cb_"+t.id; cb.checked = !!done[t.id];
+      cb.addEventListener("change", function(){
+        done[t.id] = cb.checked;
+        li.classList.toggle("done", cb.checked);
+        store("aiml_done", done);
+        updateProgress();
+      });
+      var lab = document.createElement("label");
+      lab.htmlFor = cb.id;
+      lab.innerHTML = '<span class="tname"></span><span class="tdesc"></span>';
+      lab.children[0].textContent = t.name;
+      lab.children[1].textContent = t.desc;
+      var tag = document.createElement("span");
+      tag.className = "tag"; tag.textContent = t.tag;
+      li.appendChild(cb); li.appendChild(lab); li.appendChild(tag);
+      list.appendChild(li);
+    });
+    filterTopics();
+  }
+
+  function updateProgress(){
+    var total = topics.length;
+    var count = topics.filter(function(t){return done[t.id];}).length;
+    var pct = Math.round(count/total*100);
+    $("sTotal").textContent = total;
+    $("sDone").textContent = count;
+    $("sPct").textContent = pct + "%";
+    $("barFill").style.width = pct + "%";
+    $("barWrap").setAttribute("aria-valuenow", pct);
+    var m = pct===100 ? "Excellent! All topics revised. Time for a final quiz."
+          : pct>=60 ? "Great momentum. Keep going!"
+          : pct>0 ? "Good start. Tick topics as you finish them."
+          : "Nothing completed yet. Pick a topic and begin.";
+    $("progMsg").textContent = m;
+  }
+
+  function filterTopics(){
+    var term = $("search").value.trim().toLowerCase();
+    var shown = 0;
+    Array.prototype.forEach.call(list.children, function(li){
+      var ok = li.dataset.search.indexOf(term) !== -1;
+      li.style.display = ok ? "flex" : "none";
+      if(ok) shown++;
+    });
+    $("empty").style.display = shown ? "none" : "block";
+  }
+  $("search").addEventListener("input", filterTopics);
+  $("clearSearch").addEventListener("click", function(){$("search").value="";filterTopics();$("search").focus();});
+
+  $("resetBtn").addEventListener("click", function(){
+    if(!confirm("Reset all checklist progress?")) return;
+    done = {}; store("aiml_done", done);
+    $("search").value = "";
+    renderTopics(); updateProgress();
+  });
+
+  /* ---------- Countdown ---------- */
+  var target;
+  function defaultTarget(){
+    var d = new Date(); d.setDate(d.getDate()+30); d.setHours(9,0,0,0); return d;
+  }
+  function toInputValue(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+  var saved = load("aiml_exam", null);
+  target = saved ? new Date(saved) : defaultTarget();
+  if(isNaN(target.getTime())) target = defaultTarget();
+  $("examDate").value = toInputValue(target);
+
+  function tick(){
+    var diff = target.getTime() - Date.now();
+    if(diff <= 0){
+      ["cdD","cdH","cdM","cdS"].forEach(function(i){$(i).textContent="00";});
+      $("cdInfo").textContent = "The exam date has arrived or passed. Set a new date above.";
+      return;
+    }
+    var s = Math.floor(diff/1000);
+    $("cdD").textContent = pad(Math.floor(s/86400));
+    $("cdH").textContent = pad(Math.floor(s%86400/3600));
+    $("cdM").textContent = pad(Math.floor(s%3600/60));
+    $("cdS").textContent = pad(s%60);
+    $("cdInfo").textContent = "Counting down to " + target.toDateString() + " at 9:00 AM.";
+  }
+  $("setDate").addEventListener("click", function(){
+    var v = $("examDate").value;
+    if(!v){ $("cdInfo").textContent = "Please choose a date first."; return; }
+    var d = new Date(v+"T09:00:00");
+    if(isNaN(d.getTime())){ $("cdInfo").textContent = "Invalid date."; return; }
+    target = d; store("aiml_exam", d.toISOString()); tick();
+  });
+  setInterval(tick, 1000);
+
+  /* ---------- Flashcards ---------- */
+  var deck = cards.slice(), idx = 0;
+  var fc = $("fc");
+  function showCard(){
+    fc.classList.remove("flip");
+    $("fcQ").textContent = deck[idx].q;
+    $("fcA").textContent = deck[idx].a;
+    $("fcCount").textContent = "Card " + (idx+1) + " / " + deck.length;
+  }
+  fc.addEventListener("click", function(){fc.classList.toggle("flip");});
+  fc.addEventListener("keydown", function(e){
+    if(e.key==="Enter" || e.key===" "){e.preventDefault();fc.classList.toggle("flip");}
+  });
+  $("next").addEventListener("click", function(){idx=(idx+1)%deck.length;showCard();});
+  $("prev").addEventListener("click", function(){idx=(idx-1+deck.length)%deck.length;showCard();});
+  $("shuffle").addEventListener("click", function(){
+    for(var i=deck.length-1;i>0;i--){
+      var j=Math.floor(Math.random()*(i+1)); var t=deck[i]; deck[i]=deck[j]; deck[j]=t;
+    }
+    idx = 0; showCard();
+  });
+
+  /* ---------- Quiz ---------- */
+  var quizBox = $("quiz");
+  function renderQuiz(){
+    quizBox.innerHTML = "";
+    quiz.forEach(function(item, qi){
+      var div = document.createElement("div"); div.className = "q";
+      var p = document.createElement("p"); p.textContent = (qi+1)+". "+item.q; div.appendChild(p);
+      item.o.forEach(function(text, oi){
+        var l = document.createElement("label"); l.className = "opt";
+        var r = document.createElement("input"); r.type="radio"; r.name="q"+qi; r.value=oi;
+        var s = document.createElement("span"); s.textContent = text;
+        l.appendChild(r); l.appendChild(s); div.appendChild(l);
+      });
+      var w = document.createElement("div"); w.className="why"; w.textContent = "Explanation: "+item.w;
+      div.appendChild(w);
+      quizBox.appendChild(div);
+    });
+    $("score").style.display = "none";
+    $("quizWarn").textContent = "";
+    $("submitQuiz").disabled = false;
+  }
+
+  $("submitQuiz").addEventListener("click", function(){
+    var picks = [], unanswered = 0;
+    quiz.forEach(function(_, qi){
+      var sel = document.querySelector('input[name="q'+qi+'"]:checked');
+      picks.push(sel ? Number(sel.value) : -1);
+      if(!sel) unanswered++;
+    });
+    if(unanswered){
+      $("quizWarn").textContent = "Please answer all questions (" + unanswered + " left).";
+      return;
+    }
+    $("quizWarn").textContent = "";
+    var score = 0;
+    Array.prototype.forEach.call(quizBox.children, function(div, qi){
+      var opts = div.querySelectorAll(".opt");
+      opts.forEach(function(o, oi){
+        o.querySelector("input").disabled = true;
+        if(oi === quiz[qi].a) o.classList.add("right");
+        else if(oi === picks[qi]) o.classList.add("wrong");
+      });
+      div.querySelector(".why").style.display = "block";
+      if(picks[qi] === quiz[qi].a) score++;
+    });
+    var pct = Math.round(score/quiz.length*100);
+    var verdict = pct>=80 ? "Outstanding!" : pct>=50 ? "Good effort, review the red answers." : "Keep revising, you will get there.";
+    var sc = $("score");
+    sc.innerHTML = "<b>" + score + " / " + quiz.length + "</b><div>" + pct + "% — " + verdict + "</div>";
+    sc.style.display = "block";
+    $("submitQuiz").disabled = true;
+    sc.scrollIntoView({behavior:"smooth", block:"nearest"});
+  });
+  $("resetQuiz").addEventListener("click", renderQuiz);
+
+  /* ---------- Init ---------- */
+  renderTopics(); updateProgress(); showCard(); renderQuiz(); tick();
+})();
+</script>
+</body>
+</html>

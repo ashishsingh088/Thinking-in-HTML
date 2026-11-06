@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive Neural Network Playground</title>
+<style>
+:root{
+  --bg:#070b18;--card:#0f1630;--card2:#141d3d;--line:#222c55;--ink:#e6eaff;--mut:#93a0cf;
+  --a:#8b5cf6;--b:#22d3ee;--pink:#f472b6;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;
+  background-image:radial-gradient(900px 400px at 85% -5%,rgba(139,92,246,.22),transparent 60%),radial-gradient(700px 380px at 5% 0%,rgba(34,211,238,.14),transparent 60%);
+  background-repeat:no-repeat}
+header{text-align:center;padding:42px 18px 14px;max-width:900px;margin:0 auto}
+header h1{font-size:clamp(1.6rem,5vw,2.6rem);background:linear-gradient(90deg,var(--b),var(--a));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.3px}
+header p{color:var(--mut);margin-top:6px;font-size:clamp(.95rem,2.5vw,1.12rem)}
+.info{max-width:900px;margin:18px auto 0;padding:12px 16px;border:1px solid rgba(34,211,238,.35);background:rgba(34,211,238,.07);border-radius:12px;color:#bfeaf5;font-size:.9rem}
+main{max-width:1200px;margin:24px auto;padding:0 16px;display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
+.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+h2{font-size:1.05rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+h2:before{content:"";width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--b),var(--a));box-shadow:0 0 10px var(--a)}
+.ctl{margin-bottom:18px}
+.ctl .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;font-weight:600;font-size:.9rem}
+.ctl output{color:var(--b);font-weight:700;font-variant-numeric:tabular-nums}
+.hint{font-size:.78rem;color:var(--mut);margin-top:4px}
+input[type=range]{width:100%;accent-color:var(--b);height:28px;cursor:pointer}
+.seg{display:grid;gap:6px;position:relative}
+.seg.c3{grid-template-columns:repeat(3,1fr)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{text-align:center;padding:9px 4px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--mut);transition:.2s;background:rgba(255,255,255,.02)}
+.seg label:hover{border-color:var(--a);color:var(--ink)}
+.seg input:checked+label{background:linear-gradient(135deg,var(--a),#6366f1);color:#fff;border-color:transparent;box-shadow:0 0 14px rgba(139,92,246,.45)}
+.seg input:focus-visible+label{outline:2px solid var(--b);outline-offset:2px}
+button{font:inherit;font-weight:600;border:none;border-radius:10px;padding:10px 14px;cursor:pointer;transition:transform .15s,box-shadow .15s,background .2s;color:#fff}
+button:hover{transform:translateY(-1px)}
+button:focus-visible{outline:2px solid var(--b);outline-offset:2px}
+.btn-row{display:grid;gap:8px}
+.btn-main{background:linear-gradient(135deg,var(--a),#6366f1)}
+.btn-alt{background:rgba(255,255,255,.07);border:1px solid var(--line)}
+.btn-reset{background:rgba(248,113,113,.15);color:#fecaca;border:1px solid rgba(248,113,113,.4)}
+.expl{font-size:.84rem;color:var(--mut);background:rgba(255,255,255,.04);border-left:3px solid var(--a);padding:9px 12px;border-radius:8px;margin-top:10px}
+.expl b{color:var(--ink)}
+.right{display:grid;gap:18px;min-width:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+#netWrap{width:100%;overflow:hidden;border-radius:12px;background:radial-gradient(circle at 50% 40%,rgba(139,92,246,.1),transparent 70%),#0a1128;border:1px solid var(--line)}
+#netWrap svg{display:block}
+.fadeIn{animation:fade .45s ease both}
+@keyframes fade{from{opacity:.2}to{opacity:1}}
+.outn{filter:drop-shadow(0 0 8px #8b5cf6)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:var(--mut);margin-top:10px}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+.big{font-size:clamp(2.2rem,7vw,3.2rem);font-weight:800;background:linear-gradient(90deg,var(--b),var(--a));-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums;line-height:1.1}
+.gauge{position:relative;height:14px;background:#1a2347;border-radius:99px;margin:12px 0 6px;overflow:hidden}
+.gauge i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--b),var(--a));transition:width .35s ease}
+.gauge u{position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,.6)}
+.gl{display:flex;justify-content:space-between;font-size:.72rem;color:var(--mut)}
+.cls{margin-top:10px;font-weight:700}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.chip{border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;font-size:.8rem;color:var(--mut)}
+.chip b{display:block;color:var(--ink);font-size:1rem;font-variant-numeric:tabular-nums}
+.chip.on{border-color:var(--b);background:rgba(34,211,238,.1)}
+.disc{font-size:.78rem;color:var(--mut);margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+svg text{font-family:inherit}
+.cap{font-size:.8rem;color:var(--mut);margin-top:8px;font-variant-numeric:tabular-nums}
+.lr{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:start}
+.stat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.stat div{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.78rem;color:var(--mut)}
+.stat b{display:block;color:var(--ink);font-size:.95rem;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;padding:4px 12px;border-radius:99px;font-size:.8rem;font-weight:700;margin-bottom:10px}
+.badge.ok{background:rgba(52,211,153,.15);color:var(--ok)}
+.badge.warn{background:rgba(251,191,36,.15);color:var(--warn)}
+.badge.bad{background:rgba(248,113,113,.15);color:var(--bad)}
+.how{grid-column:1/-1}
+.steps{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}
+.step{flex:1 1 150px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:14px;position:relative}
+.step b{display:block;color:var(--b);margin-bottom:4px;font-size:.95rem}
+.step span{font-size:.82rem;color:var(--mut)}
+.step .n{position:absolute;top:-10px;left:12px;background:var(--a);color:#fff;font-size:.72rem;font-weight:700;border-radius:99px;padding:1px 9px}
+.arrow{align-self:center;color:var(--a);font-size:1.3rem}
+.ex{margin-top:18px;background:#0a1128;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:.88rem}
+.ex code{display:block;font-family:Consolas,Menlo,monospace;color:#a5f3fc;margin-top:6px;word-break:break-word;font-size:.85rem}
+footer{text-align:center;color:var(--mut);padding:18px 16px 36px;font-size:.9rem}
+@media(max-width:960px){main{grid-template-columns:1fr}.two,.lr{grid-template-columns:1fr}}
+@media(max-width:700px){.arrow{display:none}.step{flex:1 1 100%}}
+@media(max-width:480px){.card{padding:15px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Interactive Neural Network Playground</h1>
+  <p>Explore how neural networks transform inputs into predictions</p>
+  <div class="info" role="note"><b>Note:</b> This is an educational simulation using sample calculations. It does not train a real neural network or use an external dataset.</div>
+</header>
+
+<main>
+  <!-- CONTROLS -->
+  <aside class="card" aria-label="Network settings">
+    <h2>Network Settings</h2>
+
+    <div class="ctl">
+      <div class="top" id="lyLabel">Hidden Layers</div>
+      <div class="seg c3" role="radiogroup" aria-labelledby="lyLabel">
+        <input type="radio" name="layers" id="ly1" value="1"><label for="ly1">1</label>
+        <input type="radio" name="layers" id="ly2" value="2" checked><label for="ly2">2</label>
+        <input type="radio" name="layers" id="ly3" value="3"><label for="ly3">3</label>
+      </div>
+    </div>
+
+    <div class="ctl">
+      <div class="top"><label for="neurons">Neurons per Hidden Layer</label><output for="neurons" id="neuronsOut"></output></div>
+      <input type="range" id="neurons" min="2" max="8" step="1" value="4">
+    </div>
+
+    <div class="ctl">
+      <div class="top" id="acLabel">Activation Function</div>
+      <div class="seg c3" role="radiogroup" aria-labelledby="acLabel">
+        <input type="radio" name="act" id="acR" value="relu" checked><label for="acR">ReLU</label>
+        <input type="radio" name="act" id="acS" value="sigmoid"><label for="acS">Sigmoid</label>
+        <input type="radio" name="act" id="acT" value="tanh"><label for="acT">Tanh</label>
+      </div>
+      <div class="expl" id="actExpl"></div>
+    </div>
+
+    <div class="ctl">
+      <div class="top"><label for="lr">Learning Rate</label><output for="lr" id="lrOut"></output></div>
+      <input type="range" id="lr" min="0" max="300" step="1" value="200">
+      <div class="hint">Log scale: 0.001 → 1</div>
+    </div>
+
+    <div class="ctl">
+      <div class="top"><label for="x1">Input X1</label><output for="x1" id="x1Out"></output></div>
+      <input type="range" id="x1" min="-1" max="1" step="0.01" value="0.6">
+    </div>
+    <div class="ctl">
+      <div class="top"><label for="x2">Input X2</label><output for="x2" id="x2Out"></output></div>
+      <input type="range" id="x2" min="-1" max="1" step="0.01" value="0.4">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-alt" id="shuffle" type="button">🎲 New Random Weights</button>
+      <button class="btn-reset" id="reset" type="button">Reset to Defaults</button>
+    </div>
+  </aside>
+
+  <!-- RIGHT -->
+  <section class="right" aria-live="polite">
+    <div class="card">
+      <h2>Neural Network Visualization</h2>
+      <div id="netWrap"></div>
+      <div class="legend">
+        <span><i style="background:#22d3ee"></i>Positive weight</span>
+        <span><i style="background:#f472b6"></i>Negative weight</span>
+        <span>Thicker line = larger weight &nbsp;•&nbsp; Brighter neuron = stronger activation</span>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <h2>Live Prediction</h2>
+        <div class="big" id="pred">0%</div>
+        <div class="gauge"><i id="gaugeFill"></i><u></u></div>
+        <div class="gl"><span>0</span><span>0.5 threshold</span><span>1</span></div>
+        <div class="cls" id="cls"></div>
+        <div class="cap" id="rawOut"></div>
+        <div class="chips" id="chips"></div>
+        <p class="disc">Educational simulation, not a trained real-world model. Weights are fixed sample values so you can see how structure and inputs change the result.</p>
+      </div>
+
+      <div class="card">
+        <h2>Activation Function Graph</h2>
+        <div id="graph"></div>
+        <p class="cap" id="graphCap"></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Learning Rate Simulation</h2>
+      <div class="lr">
+        <div>
+          <div id="loss"></div>
+          <button class="btn-main" id="replay" type="button" style="margin-top:10px;width:100%">▶ Replay Training</button>
+        </div>
+        <div>
+          <span class="badge ok" id="lrBadge"></span>
+          <p style="font-size:.9rem;color:var(--mut)" id="lrText"></p>
+          <div class="expl"><b>What is learning rate?</b> It is the step size used to update weights during training. Too small and learning crawls. Too large and the updates overshoot the best value and may diverge.</div>
+          <div class="stat">
+            <div>Learning rate<b id="stLr"></b></div>
+            <div>Update factor (1 − lr×3)<b id="stF"></b></div>
+            <div>Loss after 40 epochs<b id="stLoss"></b></div>
+            <div>Epochs to loss &lt; 0.05<b id="stEp"></b></div>
+          </div>
+          <p class="cap">Simulation: gradient descent on a simple bowl-shaped loss curve. It shows the effect of the learning rate only.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="card how" aria-labelledby="hw">
+    <h2 id="hw">How It Works</h2>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><b>Input</b><span>Numbers X1 and X2 enter the network (here between −1 and 1).</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="n">2</span><b>Weighted Sum</b><span>Each neuron multiplies every input by a weight, adds them and adds a bias: z = Σ(w·x) + b.</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="n">3</span><b>Activation Function</b><span>A non-linear function f(z) such as ReLU, Sigmoid or Tanh lets the network learn curves, not just straight lines.</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="n">4</span><b>Hidden Layers</b><span>The outputs of one layer become the inputs of the next, building more complex features.</span></div>
+      <div class="arrow">→</div>
+      <div class="step"><span class="n">5</span><b>Output</b><span>The final neuron uses a sigmoid to give a value from 0 to 1, read here as the probability of Class A.</span></div>
+    </div>
+    <div class="ex" id="example"></div>
+  </section>
+</main>
+
+<footer>Built with AI assistance for GenAI Internship — Project 2</footer>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){return document.getElementById(id);};
+
+  var DEF = {layers:2, neurons:4, act:"relu", lrv:200, x1:0.6, x2:0.4};
+  var seed = 0, lastStruct = "";
+  var anim = null, shown = 40;
+  var EPOCHS = 40, K = 3;
+
+  var ACTS = {
+    relu:   {name:"ReLU",    f:function(z){return Math.max(0,z);}, color:"#22d3ee",
+             text:"<b>ReLU</b> f(z) = max(0, z). Negative values become 0 and positive values pass through. It is fast and the default choice in many deep networks."},
+    sigmoid:{name:"Sigmoid", f:function(z){return 1/(1+Math.exp(-z));}, color:"#a78bfa",
+             text:"<b>Sigmoid</b> f(z) = 1 / (1 + e<sup>−z</sup>). It squashes any value into the range 0 to 1, which is useful for probabilities but can slow learning for very large or small z."},
+    tanh:   {name:"Tanh",    f:function(z){return Math.tanh(z);}, color:"#f472b6",
+             text:"<b>Tanh</b> f(z) = (e<sup>z</sup> − e<sup>−z</sup>) / (e<sup>z</sup> + e<sup>−z</sup>). It squashes values into −1 to 1 and is centred on zero, which often helps hidden layers."}
+  };
+
+  /* Deterministic pseudo-random number in [-1, 1] from three integers */
+  function rnd(a,b,c){
+    var h = (a*374761393 + b*668265263 + c*2147483647 + 1013904223) | 0;
+    h = Math.imul(h ^ (h>>>15), 2246822519);
+    h = Math.imul(h ^ (h>>>13), 3266489917);
+    h = h ^ (h>>>16);
+    return ((h>>>0) % 20001) / 10000 - 1;
+  }
+  function wgt(l,i,j,fan,isOut){return rnd(l+seed*13,i,j) * (isOut?3:2.2) / Math.sqrt(fan);}
+  function bias(l,i,isOut){return rnd(l+seed*13,i,77) * (isOut?0.5:0.4);}
+  function sig(z){return 1/(1+Math.exp(-z));}
+  function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+  function sgn(v){return (v>=0?"+":"−")+Math.abs(v).toFixed(2);}
+  function fmt(v){return (v<0?"−":"")+Math.abs(v).toFixed(2);}
+
+  function lrOf(v){return Math.pow(10,-3+v/100);}
+  function fmtLr(l){return l>=0.1 ? l.toFixed(2) : l>=0.01 ? l.toFixed(3) : l.toFixed(4);}
+
+  function getState(){
+    return {
+      layers:+document.querySelector('input[name="layers"]:checked').value,
+      neurons:+$("neurons").value,
+      act:document.querySelector('input[name="act"]:checked').value,
+      lrv:+$("lr").value, x1:+$("x1").value, x2:+$("x2").value
+    };
+  }
+
+  /* Forward pass */
+  function forward(s, actKey){
+    var f = ACTS[actKey].f, sizes = [2], i, j, l;
+    for(i=0;i<s.layers;i++) sizes.push(s.neurons);
+    sizes.push(1);
+    var acts = [[s.x1,s.x2]], zs = [[]];
+    for(l=1;l<sizes.length;l++){
+      var isOut = (l===sizes.length-1), za=[], aa=[];
+      for(i=0;i<sizes[l];i++){
+        var z = bias(l,i,isOut);
+        for(j=0;j<sizes[l-1];j++) z += wgt(l,i,j,sizes[l-1],isOut) * acts[l-1][j];
+        za.push(z);
+        aa.push(isOut ? sig(z) : f(z));
+      }
+      zs.push(za); acts.push(aa);
+    }
+    return {sizes:sizes, acts:acts, zs:zs};
+  }
+
+  /* ---------- Network drawing ---------- */
+  function renderNet(s,res){
+    var wrap = $("netWrap");
+    var W = Math.max(300, Math.floor(wrap.clientWidth)), H = W<520 ? 400 : 440;
+    var cols = res.sizes.length, padL=46, padR=46, padT=30, padB=74;
+    var colW = (W-padL-padR)/(cols-1), availH = H-padT-padB;
+    var maxN = Math.max.apply(null,res.sizes);
+    var gap = Math.min(52, availH/maxN);
+    var r = Math.max(9, Math.min(18, gap*0.42, colW*0.3));
+    var fs = r<14 ? 8 : 10;
+    var l,i,j,pos=[];
+    for(l=0;l<cols;l++){
+      var n=res.sizes[l], arr=[];
+      for(i=0;i<n;i++) arr.push({x:padL+l*colW, y:padT+availH/2+(i-(n-1)/2)*gap});
+      pos.push(arr);
+    }
+    var struct = s.layers+"-"+s.neurons+"-"+seed;
+    var cls = struct!==lastStruct ? "fadeIn" : "";
+    lastStruct = struct;
+
+    var out = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Neural network diagram with 2 input neurons, '+s.layers+' hidden layer(s) of '+s.neurons+' neurons and 1 output neuron"><g class="'+cls+'">';
+
+    for(l=1;l<cols;l++){
+      var isOut=(l===cols-1);
+      for(i=0;i<res.sizes[l];i++){
+        for(j=0;j<res.sizes[l-1];j++){
+          var w = wgt(l,i,j,res.sizes[l-1],isOut);
+          var col = w>=0 ? "#22d3ee" : "#f472b6";
+          var sw = 0.5 + Math.min(1.6,Math.abs(w))*1.3;
+          var op = 0.15 + 0.55*Math.min(1,Math.abs(w)/1.5);
+          out += '<line x1="'+pos[l-1][j].x.toFixed(1)+'" y1="'+pos[l-1][j].y.toFixed(1)+'" x2="'+pos[l][i].x.toFixed(1)+'" y2="'+pos[l][i].y.toFixed(1)+'" stroke="'+col+'" stroke-width="'+sw.toFixed(2)+'" stroke-opacity="'+op.toFixed(2)+'"/>';
+        }
+      }
+    }
+
+    for(l=0;l<cols;l++){
+      for(i=0;i<res.sizes[l];i++){
+        var a = res.acts[l][i], t = clamp(Math.abs(a),0,1);
+        var fill = l===0 ? "#22d3ee" : (a>=0 ? "#8b5cf6" : "#ec4899");
+        var isOutN = l===cols-1;
+        var p = pos[l][i];
+        out += '<circle class="'+(isOutN?'outn':'')+'" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="#0d1432"/>';
+        out += '<circle class="'+(isOutN?'outn':'')+'" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+r.toFixed(1)+'" fill="'+fill+'" fill-opacity="'+(0.22+0.78*t).toFixed(2)+'" stroke="#c4b5fd" stroke-width="1.5"><title>'+(l===0?'Input':'Neuron')+' value: '+a.toFixed(3)+'</title></circle>';
+        out += '<text x="'+p.x.toFixed(1)+'" y="'+(p.y+fs*0.35).toFixed(1)+'" text-anchor="middle" font-size="'+fs+'" font-weight="600" fill="#fff">'+a.toFixed(2)+'</text>';
+      }
+    }
+
+    out += '<text x="'+(pos[0][0].x-r-8)+'" y="'+(pos[0][0].y+4)+'" text-anchor="end" font-size="12" fill="#93a0cf">X1</text>';
+    out += '<text x="'+(pos[0][1].x-r-8)+'" y="'+(pos[0][1].y+4)+'" text-anchor="end" font-size="12" fill="#93a0cf">X2</text>';
+    out += '<text x="'+(pos[cols-1][0].x+r+8)+'" y="'+(pos[cols-1][0].y+5)+'" text-anchor="start" font-size="15" fill="#c4b5fd">ŷ</text>';
+
+    var ly = H-56, lf = W<420 ? 11 : 13;
+    for(l=0;l<cols;l++){
+      var x = padL+l*colW, a1, a2, a3;
+      if(l===0){a1="Input"; a2="Layer"; a3="2 neurons";}
+      else if(l===cols-1){a1="Output"; a2="Layer"; a3="1 neuron";}
+      else {a1="Hidden"; a2="Layer "+l; a3=res.sizes[l]+" neurons";}
+      out += '<text text-anchor="middle" x="'+x.toFixed(1)+'" y="'+ly+'" font-size="'+lf+'" font-weight="700" fill="#e6eaff">'+a1+'</text>';
+      out += '<text text-anchor="middle" x="'+x.toFixed(1)+'" y="'+(ly+lf+2)+'" font-size="'+lf+'" font-weight="700" fill="#e6eaff">'+a2+'</text>';
+      out += '<text text-anchor="middle" x="'+x.toFixed(1)+'" y="'+(ly+2*lf+5)+'" font-size="'+(lf-2)+'" fill="#93a0cf">'+a3+'</text>';
+    }
+    out += '</g></svg>';
+    wrap.innerHTML = out;
+  }
+
+  /* ---------- Activation graph ---------- */
+  function renderGraph(s,res){
+    var W=320,H=210,L=34,R=12,T=12,B=26,xMin=-4,xMax=4,yMin=-1.5,yMax=4;
+    function X(x){return L+(x-xMin)/(xMax-xMin)*(W-L-R);}
+    function Y(y){return T+(yMax-y)/(yMax-yMin)*(H-T-B);}
+    var a = ACTS[s.act], f = a.f, i, o = '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Graph of the '+a.name+' activation function">';
+    var xt=[-4,-2,0,2,4], yt=[-1,0,1,2,3,4];
+    xt.forEach(function(v){
+      o += '<line x1="'+X(v)+'" y1="'+T+'" x2="'+X(v)+'" y2="'+(H-B)+'" stroke="'+(v===0?'#5b6bb0':'#222c55')+'" stroke-width="'+(v===0?1.5:1)+'"/>';
+      o += '<text x="'+X(v)+'" y="'+(H-9)+'" font-size="10" text-anchor="middle" fill="#93a0cf">'+v+'</text>';
+    });
+    yt.forEach(function(v){
+      o += '<line x1="'+L+'" y1="'+Y(v)+'" x2="'+(W-R)+'" y2="'+Y(v)+'" stroke="'+(v===0?'#5b6bb0':'#222c55')+'" stroke-width="'+(v===0?1.5:1)+'"/>';
+      o += '<text x="'+(L-6)+'" y="'+(Y(v)+3)+'" font-size="10" text-anchor="end" fill="#93a0cf">'+v+'</text>';
+    });
+    var d='';
+    for(i=0;i<=80;i++){
+      var x = xMin+i*0.1, y = clamp(f(x),yMin,yMax);
+      d += (i?'L':'M')+X(x).toFixed(1)+' '+Y(y).toFixed(1);
+    }
+    o += '<path d="'+d+'" fill="none" stroke="'+a.color+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+    var z = res.zs[1][0], zc = clamp(z,xMin,xMax), fy = clamp(f(zc),yMin,yMax);
+    o += '<circle cx="'+X(zc).toFixed(1)+'" cy="'+Y(fy).toFixed(1)+'" r="6" fill="#fff" stroke="'+a.color+'" stroke-width="3"/>';
+    o += '<text x="'+(W-R)+'" y="'+(Y(0)-5)+'" font-size="10" text-anchor="end" fill="#93a0cf">z</text>';
+    o += '<text x="'+(L+4)+'" y="'+(T+10)+'" font-size="10" fill="#93a0cf">f(z)</text>';
+    o += '</svg>';
+    $("graph").innerHTML = o;
+    $("graphCap").textContent = "White dot: Hidden Layer 1, Neuron 1 → z = "+fmt(z)+", f(z) = "+fmt(f(z))+".";
+  }
+
+  /* ---------- Learning-rate simulation ---------- */
+  function lossSeries(lr){
+    var f = 1-lr*K, e = 1, pts = [], t;
+    for(t=0;t<=EPOCHS;t++){pts.push(0.5*K*e*e); e*=f;}
+    return pts;
+  }
+  function drawLoss(){
+    var lr = lrOf(+$("lr").value), pts = lossSeries(lr);
+    var W=320,H=190,L=34,R=12,T=12,B=28,YM=3;
+    function X(t){return L+t/EPOCHS*(W-L-R);}
+    function Y(v){return T+(1-Math.min(v,YM)/YM)*(H-T-B);}
+    var o='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="Simulated loss curve over 40 epochs">', i;
+    [0,1.5,3].forEach(function(v){
+      o += '<line x1="'+L+'" y1="'+Y(v)+'" x2="'+(W-R)+'" y2="'+Y(v)+'" stroke="#222c55"/>';
+      o += '<text x="'+(L-6)+'" y="'+(Y(v)+3)+'" font-size="10" text-anchor="end" fill="#93a0cf">'+(v===3?'3+':v)+'</text>';
+    });
+    [0,20,40].forEach(function(t){
+      o += '<text x="'+X(t)+'" y="'+(H-12)+'" font-size="10" text-anchor="middle" fill="#93a0cf">'+t+'</text>';
+    });
+    o += '<text x="'+((L+W-R)/2)+'" y="'+(H-1)+'" font-size="10" text-anchor="middle" fill="#93a0cf">epochs</text>';
+    o += '<text x="'+(L+4)+'" y="'+(T+10)+'" font-size="10" fill="#93a0cf">loss</text>';
+    var d='';
+    for(i=0;i<=shown;i++) d += (i?'L':'M')+X(i).toFixed(1)+' '+Y(pts[i]).toFixed(1);
+    o += '<path d="'+d+'" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-linejoin="round"/>';
+    o += '<circle cx="'+X(shown).toFixed(1)+'" cy="'+Y(pts[shown]).toFixed(1)+'" r="4.5" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>';
+    o += '</svg>';
+    $("loss").innerHTML = o;
+  }
+  function lrInfo(){
+    var lr = lrOf(+$("lr").value), f = 1-lr*K, pts = lossSeries(lr), af=Math.abs(f), cls, title, text, i;
+    if(f>=0.95){cls="warn"; title="Too slow"; text="The steps are tiny, so the loss barely falls in 40 epochs. Training would take very long.";}
+    else if(f>=0){cls="ok"; title="Smooth convergence"; text="Each step moves closer to the minimum without overshooting. This is the healthy range.";}
+    else if(af<0.95){cls="warn"; title="Overshoots but settles"; text="Steps jump past the minimum and swing back, but the loss still shrinks over time.";}
+    else if(af<=1.05){cls="warn"; title="Oscillating"; text="The steps are so big that the loss bounces around without improving.";}
+    else {cls="bad"; title="Diverging"; text="The steps are too large, so every update makes the loss worse. The loss explodes.";}
+    var b=$("lrBadge"); b.className="badge "+cls; b.textContent=title;
+    $("lrText").textContent = text;
+    $("stLr").textContent = fmtLr(lr);
+    $("stF").textContent = fmt(f);
+    var last = pts[EPOCHS];
+    $("stLoss").textContent = last>1000 ? "huge (>1000)" : last.toFixed(3);
+    var ep = -1;
+    for(i=0;i<=EPOCHS;i++){ if(pts[i]<0.05){ep=i;break;} }
+    $("stEp").textContent = ep<0 ? "not reached" : String(ep);
+  }
+  function stopAnim(){ if(anim){clearInterval(anim); anim=null;} }
+
+  /* ---------- Main update ---------- */
+  function update(){
+    var s = getState(), res = forward(s,s.act);
+    $("neuronsOut").textContent = s.neurons;
+    $("lrOut").textContent = fmtLr(lrOf(s.lrv));
+    $("x1Out").textContent = fmt(s.x1);
+    $("x2Out").textContent = fmt(s.x2);
+    $("actExpl").innerHTML = ACTS[s.act].text;
+
+    renderNet(s,res);
+    renderGraph(s,res);
+
+    var p = res.acts[res.acts.length-1][0];
+    $("pred").textContent = (p*100).toFixed(1)+"%";
+    $("gaugeFill").style.width = (p*100).toFixed(1)+"%";
+    $("cls").textContent = p>=0.5 ? "Predicted: Class A (positive)" : "Predicted: Class B (negative)";
+    $("cls").style.color = p>=0.5 ? "#67e8f9" : "#f9a8d4";
+    var zOut = res.zs[res.zs.length-1][0];
+    $("rawOut").textContent = "Output neuron: z = "+fmt(zOut)+" → sigmoid(z) = "+p.toFixed(3)+" (activation: "+ACTS[s.act].name+" in hidden layers)";
+
+    var chips="";
+    ["relu","sigmoid","tanh"].forEach(function(k){
+      var r2 = forward(s,k), v = r2.acts[r2.acts.length-1][0];
+      chips += '<div class="chip'+(k===s.act?' on':'')+'">'+ACTS[k].name+'<b>'+(v*100).toFixed(1)+'%</b></div>';
+    });
+    $("chips").innerHTML = chips;
+
+    var w1 = wgt(1,0,0,2,false), w2 = wgt(1,0,1,2,false), b1 = bias(1,0,false);
+    var z = res.zs[1][0], a = res.acts[1][0];
+    $("example").innerHTML = "<b>Live worked example</b> — Hidden Layer 1, Neuron 1 with current inputs:" +
+      "<code>z = (w1 × X1) + (w2 × X2) + b = ("+fmt(w1)+" × "+fmt(s.x1)+") "+sgn(w2*s.x2).replace(/^(.)/,"$1 ")+" [("+fmt(w2)+" × "+fmt(s.x2)+")] "+sgn(b1).replace(/^(.)/,"$1 ")+" [bias] = "+fmt(z)+"</code>" +
+      "<code>a = "+ACTS[s.act].name+"(z) = "+ACTS[s.act].name+"("+fmt(z)+") = "+fmt(a)+"</code>" +
+      "<code>This value is then sent to every neuron in the next layer.</code>";
+
+    stopAnimIfIdle();
+    drawLoss();
+    lrInfo();
+  }
+  function stopAnimIfIdle(){ /* keep an in-progress replay running unless the learning rate changed */ }
+
+  function onLrChange(){ stopAnim(); shown = EPOCHS; update(); }
+
+  /* ---------- Events ---------- */
+  ["neurons","x1","x2"].forEach(function(id){$(id).addEventListener("input", update);});
+  $("lr").addEventListener("input", onLrChange);
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="layers"],input[name="act"]'), function(el){
+    el.addEventListener("change", update);
+  });
+
+  $("replay").addEventListener("click", function(){
+    stopAnim(); shown = 0; drawLoss();
+    anim = setInterval(function(){
+      shown++;
+      drawLoss();
+      if(shown>=EPOCHS){ stopAnim(); }
+    }, 70);
+  });
+
+  $("shuffle").addEventListener("click", function(){ seed++; update(); });
+
+  $("reset").addEventListener("click", function(){
+    stopAnim(); shown = EPOCHS; seed = 0;
+    document.querySelector('input[name="layers"][value="'+DEF.layers+'"]').checked = true;
+    document.querySelector('input[name="act"][value="'+DEF.act+'"]').checked = true;
+    $("neurons").value = DEF.neurons; $("lr").value = DEF.lrv;
+    $("x1").value = DEF.x1; $("x2").value = DEF.x2;
+    update();
+  });
+
+  var rz = null;
+  window.addEventListener("resize", function(){
+    if(rz) cancelAnimationFrame(rz);
+    rz = requestAnimationFrame(function(){ var s=getState(); renderNet(s,forward(s,s.act)); });
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
